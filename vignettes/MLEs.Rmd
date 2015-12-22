@@ -9,18 +9,26 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
+```{r global_options, include=FALSE}
+knitr::opts_chunk$set(fig.width=7, fig.height=6, 
+                      warning=FALSE, message=FALSE)
+```
+
 First, we'll load some of the necessary packages:
 
 ```{r pkgs, message=FALSE,warning=FALSE}
 library(lme4)
 library(bbmle)
 library(optimx)
+library(plotly)
 library(psyphy)
 library(lattice)
 library(ggplot2)
 library(dplyr)
 library(nlme)
 library(zoo)
+library(boot)
+library(tidyr)
 ```
 For example, to read in the csv containing the data for the free RT...
 
@@ -71,8 +79,12 @@ forced_rt <- forced_rt %>% arrange(RT) %>%
 And plots:
 
 ```{r, warning=FALSE}
-ggplot(free_rt, aes(rollrt, rollhit)) + geom_line() + facet_wrap(~id) 
-ggplot(forced_rt, aes(rollrt, rollhit)) + geom_line() + facet_wrap(~id) 
+ggplot(free_rt, aes(RT)) + 
+  geom_histogram(aes(fill = as.factor(hit)), bins = 15) + 
+  facet_wrap(~id)
+ggplot(forced_rt, aes(rollrt, rollhit)) + 
+  geom_line() + 
+  facet_wrap(~id) 
 
 ```
 
@@ -104,7 +116,11 @@ mod1 <- mle2(llsig,
             fixed = list(Ntargs = 8))
 ```
     
-It takes some work to get answers out of `mle2`, and the optimizers in R aren't as robust as MATLAB's (at least I've heard).
+It takes some work to get answers out of `mle2`, and the optimizers in R tend not to be as robust as those in MATLAB (at least I've heard/experienced).
+
+One option is to go the hierarchical/multilevel/mixed model route, which can save us an awful lot of parameters to estimate, plus make interpretation of individual vs. group performance quite a bit cleaner.
+
+<note about shrinkage>
 
 Interpretation isn't as direct, but this sort of thing can be fit with `lme4`.
 
@@ -118,18 +134,67 @@ mlme <- glmer(hit ~ RT + (1|id),
     #xyplot(lmeprof2)
 ```
 
-In nlme, here's a fully parameterized model (random asymptote, mean, and sd):
+In nlme, here's a (mostly) parameterized model (random asymptote, mean, and sd, but no correlation in the random effects. The *fully* parameterized model was tending toward overparameterization, as we got an error suggesting the approx. Hessian of the deviance was not positive definite):
 ```{r}
 mnlme <- nlme(hit ~ 1/8 + asym * pnorm(RT, mu, sigma), data = forced_rt,
-           fixed = asym + mu + sigma ~ 1, random = asym + mu + sigma ~ 1, 
+           fixed = asym + mu + sigma ~ 1, random = pdDiag(asym + mu + sigma ~ 1), 
            start = c(asym = .9, mu = .25, sigma = .04), groups = ~id)
 summary(mnlme)
+```
+
+Plus intervals on parameters:
+```{r}
+
+intervals(mnlme)
+
+```
+
+We'll see how those line up with the rolling average (interactively!):
+```{r}
 forced_rt$pred <- predict(mnlme)
-ggplot(forced_rt, aes(rollrt, rollhit)) + 
-  geom_line(aes(colour = 'Rolling mean'), size = 1.2) + 
-  geom_line(aes(y = pred, colour = 'nlme pred'), size = 1.2) +
-  facet_wrap(~id) +
-  theme_light()
+forced_rt$pred0 <- predict(mnlme, level = 0)
+temp <- ggplot(forced_rt, aes(rollrt, rollhit)) + 
+  geom_line(aes(colour = 'Rolling mean'), size = 0.2) + 
+  geom_line(aes(y = pred, colour = 'nlme pred'), size = 0.2) +
+  facet_wrap(~id)
+ggplotly(temp)
+
+ggplot(forced_rt, aes(RT, pred0)) + 
+    geom_line(aes(y = pred, colour = 'indiv_pred', group = id), 
+              size = 1, alpha = .5) + 
+    geom_line(aes(colour = 'Pop pred'), size = 2) 
 ```
 
 It works fine, conditional on starting values being relatively close to the solution.
+
+## Free RT
+
+We'll try a random intercept model first, and use parametric bootstrap for inference.
+
+```{r}
+mlme <- lmer(formula = RT ~ 1 + (1 | id), data = free_rt) # Use REML: does this count as "small"?
+boots <- bootMer(mlme, FUN = function(x) 
+  predict(x, newdata = data.frame(id = unique(free_rt$id))), 
+  seed = 1, nsim = 500)
+temp <- data.frame(boots$t)
+names(temp) <- dimnames(boots$t)[[2]]
+temp <- gather(temp, id, val) # from tidyr
+temp2 <- data.frame(xx = boots$t0, id = unique(free_rt$id))
+
+ggplot(free_rt, aes(x = RT)) + 
+    geom_histogram(aes(fill = 'raw', y = ..count../sum(..count..)), # rescale counts
+                   bins = 20, alpha = .7) + 
+    geom_histogram(data = temp, aes(x = val, y = ..count../sum(..count..),
+                                    fill = 'pred'), bins = 20, alpha = .7) + 
+    geom_vline(data = temp2, aes(xintercept = xx), size = 1, colour = 'black',
+               linetype = 'longdash') +
+    facet_wrap(~id)
+```
+
+This seems to give reasonable estimates. There may be some bias between the original prediction and the median of the parametric bootstrap, but the magnitude of that bias is relatively small.
+
+```{r}
+
+print(boots)
+
+```
