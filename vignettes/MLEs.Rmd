@@ -98,6 +98,7 @@ ggplot(forced_rt, aes(rollrt, rollhit)) +
 ```
 
 ## Maximum Likelihood Estimation
+
 There were eight targets in this experiment. The objective function in `MATLAB` is specified as:
 
 > `LL = @(params) `
@@ -170,7 +171,7 @@ ggplot(forced_rt, aes(RT, pred0)) +
 
 It works fine, conditional on starting values being relatively close to the solution.
 
-## Free RT
+## Free Reaction Time
 
 We'll try a random intercept model first, and use parametric bootstrap for inference.
 
@@ -197,26 +198,29 @@ ggplot(free_rt, aes(x = RT)) +
 This seems to give reasonable estimates. There may be some bias between the original prediction and the median of the parametric bootstrap, but the magnitude of that bias is relatively small.
 
 ```{r}
-
 print(boots)
-
 ```
-
 
 ## Template Model Builder Example
 
 ```{r}
+# Also see https://groups.nceas.ucsb.edu/non-linear-modeling/projects
 # writeLines(con = file("temp.cpp"), c('
 # #include <TMB.hpp>
 # 
 # template<class Type>
 # Type objective_function<Type>::operator() ()
 # {
-#     DATA_VECTOR(hit);     // Observations
-#     DATA_VECTOR(rt);       // Reaction time
-#     PARAMETER(mu);
-#     PARAMETER(sig);
-#     PARAMETER(asym);
+#     DATA_INTEGER(ntarg);    // number of targets
+#     DATA_VECTOR(hit);       // Obs ervations
+#     DATA_VECTOR(rt);        // Reaction time
+#     DATA_FACTOR(id);        // individuals
+#     PARAMETER(mu);          // mean
+#     PARAMETER(sig);         // sigma
+#     PARAMETER(asym);        // asymptote
+#     PARAMETER(log_sigma);   // ?
+#     PARAMETER(log_sigma_u); // ?
+#     PARAMETER_VECTOR(u);    // random effects contributions
 # }
 # 
 # ')); closeAllConnections()
