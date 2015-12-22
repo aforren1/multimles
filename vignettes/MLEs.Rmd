@@ -125,9 +125,16 @@ One option is to go the hierarchical/multilevel/mixed model route, which can sav
 
 In nlme, here's a (mostly) parameterized model (random asymptote, mean, and sd, but no correlation in the random effects. The *fully* parameterized model was tending toward overparameterization, as we got an error suggesting the approx. Hessian of the deviance was not positive definite):
 ```{r}
-mnlme <- nlme(hit ~ 1/8 + asym * pnorm(RT, mu, sigma), data = forced_rt,
-           fixed = asym + mu + sigma ~ 1, random = pdDiag(asym + mu + sigma ~ 1), 
-           start = c(asym = .9, mu = .25, sigma = .04), groups = ~id)
+mnlme <- nlme(hit ~ 1/8 + 7/8 * asym * pnorm(RT, mu, sigma), 
+              data = forced_rt,
+           fixed = asym + mu + sigma ~ 1, 
+           random = pdDiag(asym + mu + sigma ~ 1), 
+           start = c(asym = .9, mu = .25, sigma = .04), 
+           groups = ~id,
+           weights = varExp(form = ~RT)) #consider adding a function to describe within-group variance,
+                         #like weights = varExp(form = ~RT). The model fits better and sort of
+                         #makes sense, though I haven't wrapped my head around what it *means*.
+                         #It does make sense to have unequal variance (large at low RT, small at high)
 summary(mnlme)
 ```
 
