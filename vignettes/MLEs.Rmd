@@ -63,7 +63,7 @@ Where `asymptErr` was the upper asymptote to the probit curve (starting value of
 
 A way to do it in R is with the `bbmle` package, a wrapper around the `mle`? function plus a number of very useful helper functions.
 
-```{r}
+```{r, warning=FALSE,message=FALSE}
 llsig <- function(mu, sigma, asymptErr, rt, hit, Ntargs){
     p1 <- log(1/Ntargs + asymptErr * pnorm(rt, mu, sigma)*(1 - 1/Ntargs))
     p2 <- log(1 - (1/Ntargs + asymptErr * pnorm(rt, mu, sigma) * (1 - 1/Ntargs)))
@@ -90,7 +90,6 @@ mlme <- glmer(hit ~ RT + (1|id),
               family = binomial(link = mafc.probit(8)))
     mlme2 <- update(mlme, .~. + (0 + RT|id)) # enforcing correlation doesn't work
     anova(mlme, mlme2)
-    lmeprof2 <- profile(mlme2)
-    
-    xyplot(lmeprof2)
+    #lmeprof2 <- profile(mlme2)
+    #xyplot(lmeprof2)
 ```
