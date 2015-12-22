@@ -62,7 +62,7 @@ There were eight targets in this experiment. The objective function in `MATLAB` 
 Where `asymptErr` was the upper asymptote to the probit curve (starting value of 0.9), `params(1)` was the mean (start 0.3), and `params(2)` was the sd (start 0.1).
 
 A way to do it in R is with the `bbmle` package, a wrapper around the `mle`? function plus a number of very useful helper functions.
-# Note: LL doesn't actually match Adrian's yet
+
 ```{r}
 llsig <- function(mu, sigma, asymptErr, rt, hit, Ntargs){
     p1 <- log(1/Ntargs + asymptErr * pnorm(rt, mu, sigma)*(1 - 1/Ntargs))
@@ -84,7 +84,7 @@ It takes some work to get answers out of `mle2`, and the optimizers in R aren't 
 
 Interpretation isn't as direct, but this sort of thing can be fit with `lme4`.
 
-```{r}
+```{r,warning=FALSE,message=FALSE}
 mlme <- glmer(hit ~ RT + (1|id), 
               data = forced_rt, 
               family = binomial(link = mafc.probit(8)))
