@@ -201,3 +201,32 @@ This seems to give reasonable estimates. There may be some bias between the orig
 print(boots)
 
 ```
+
+
+## Template Model Builder Example
+
+```{r}
+# writeLines(con = file("temp.cpp"), c('
+# #include <TMB.hpp>
+# 
+# template<class Type>
+# Type objective_function<Type>::operator() ()
+# {
+#     DATA_VECTOR(hit);     // Observations
+#     DATA_VECTOR(rt);       // Reaction time
+#     PARAMETER(mu);
+#     PARAMETER(sig);
+#     PARAMETER(asym);
+# }
+# 
+# ')); closeAllConnections()
+# 
+# dat <- list(rt = forced_rt$RT, hit = forced_rt$hit)
+# obj <- MakeADFun(data = dat,
+#                  parameters = list(
+#                    mu = 0.3,
+#                    sig = 0.1,
+#                    asym = 0.9
+#                  ),
+#                  random = c('mu','sig','asym'))
+```
