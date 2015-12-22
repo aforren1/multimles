@@ -4,9 +4,9 @@ Version: 0.1
 Authors@R: person("Alexander", "Forrence", email = "aforren1@jhmi.edu",
                   role = c("aut", "cre"))
 Description: Examples of MLE, worked with different datasets in lab.
-Depends:
+Depends: 
     R (>= 3.1.0)
-Imports:
+Imports: 
     bbmle,
     TMB,
     ggplot2,
@@ -15,3 +15,6 @@ Imports:
 License: MIT
 LazyData: true
 RoxygenNote: 5.0.1
+Suggests: knitr,
+    rmarkdown
+VignetteBuilder: knitr
