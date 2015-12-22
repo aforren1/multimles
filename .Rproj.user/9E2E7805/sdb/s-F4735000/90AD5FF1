@@ -1,0 +1,17 @@
+{
+    "contents" : "Package: multimles\nTitle: Maximum Likelihood Examples For BLAM\nVersion: 0.1\nAuthors@R: person(\"Alexander\", \"Forrence\", email = \"aforren1@jhmi.edu\",\n                  role = c(\"aut\", \"cre\"))\nDescription: Examples of MLE, worked with different datasets in lab.\nDepends:\n    R (>= 3.1.0)\nImports:\n    bbmle,\n    TMB,\n    ggplot2,\n    psyphy,\n    emdbook\nLicense: MIT\nLazyData: true\nRoxygenNote: 5.0.1\n",
+    "created" : 1450730907597.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "1546729592",
+    "id" : "90AD5FF1",
+    "lastKnownWriteTime" : 1450731547,
+    "path" : "~/Documents/BLAM/multimles/DESCRIPTION",
+    "project_path" : "DESCRIPTION",
+    "properties" : {
+    },
+    "relative_order" : 3,
+    "source_on_save" : false,
+    "type" : "dcf"
+}

@@ -1,0 +1,18 @@
+{
+    "contents" : "\n## Free and forced reaction time datasets, plus analysis\n\nFor example, to read in the csv containing the data for the free RT...\n\n    free_rt <- read.csv(system.file(\"extdata\", \"bigrt.csv\", package = 'multimles'),\n                   header = FALSE,\n                   col.names = c('id', 'RT', 'reachDir', 'hit'))\n\nand for the forced RT,\n\n    forced_rt <- read.csv(system.file(\"extdata\", \"bigtr.csv\", package = 'multimles'),\n                   header = FALSE,\n                   col.names = c('id', 'RT', 'reachDir', 'hit'))\n\nTo clean up the data a bit, try things like\n\n    free_rt <- free_rt[complete.cases(free_rt),]\n    free_rt <- free_rt[!(free_rt$RT > 0.5),]\n    free_rt <- free_rt[!(free_rt$RT < 0),]\n    # Should have 1860 obs. left over (check with str())\n    \nOr (in `dplyr` syntax):\n\n    free_rt <- free_rt %>% \n                   filter(!is.nan(reachDir), RT < 0.5, RT > 0)\n\nAlternatives are left as an exercise to the reader.\n\n## MLE\nThere were eight targets in this experiment. The objective function in `MATLAB` is specified as:\n\n        LL = @(params) -sum(hit.*log((1/8+asymptErr*normcdf(RT,params(1),params(2))*7/8)) + (1-hit).*log(1-(1/8+asymptErr*normcdf(RT,params(1),params(2))*7/8)));\n\nWhere `asymptErr` was the upper asymptote to the probit curve (starting value of 0.9), `params(1)` was the mean (start 0.3), and `params(2)` was the sd (start 0.1).\n\nA way to do it in R is with the `bbmle` package, a wrapper around the `mle`? function plus a number of very useful helper functions.\n\n    llsig <- function(mu, sigma, asymptErr, rt, hit, alpha, Ntargs){\n        p1 <- log(1/Ntargs + (asymptErr - 1/Ntargs) * pnorm(rt, mu, sigma))\n        p2 <- log(1 - (1/Ntargs + (asymptErr - 1/Ntargs) * pnorm(rt, mu, sigma)))\n        -sum(hit %*% p1 + (1 - hit) %*% p2) - alpha * sigma^2\n    }\n    \n    start_vals <- list(mu = 0.3, sigma = 0.1, asymptErr = 0.9)\n    subdat <- dplyr::filter(forced_rt, id == 3)\n    mod1 <- mle2(llsig, \n               start = start_vals, \n               method = \"BFGS\", \n               optimizer = \"optim\",\n               data = list(rt = subdat$RT, hit = subdat$hit),\n               fixed = list(alpha = 0, Ntargs = 8))\n\nInterpretation isn't as direct, but this sort of thing can be fit with `lme4`.\n\n    library(lme4)\n    library(psyphy)\n    mlme <- glmer(hit ~ RT + (1|id), \n                  data = forced_rt, \n                  family = binomial(link = mafc.probit(8)))\n    lmeprof <- profile(mlme)\n    df <- forced_rt\n    df$pred <- predict(mlme, type = 'response')\n    mlme2 <- update(mlme, .~. + (0 + RT|id), nAGQ = 1) # enforcing correlation doesn't work\n\n",
+    "created" : 1450749452512.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "1778936233",
+    "id" : "B6D04B9F",
+    "lastKnownWriteTime" : 1450752980,
+    "path" : "~/Documents/BLAM/multimles/README.md",
+    "project_path" : "README.md",
+    "properties" : {
+        "tempName" : "Untitled1"
+    },
+    "relative_order" : 5,
+    "source_on_save" : false,
+    "type" : "markdown"
+}

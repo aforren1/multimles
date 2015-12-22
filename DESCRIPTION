@@ -1,0 +1,17 @@
+Package: multimles
+Title: Maximum Likelihood Examples For BLAM
+Version: 0.1
+Authors@R: person("Alexander", "Forrence", email = "aforren1@jhmi.edu",
+                  role = c("aut", "cre"))
+Description: Examples of MLE, worked with different datasets in lab.
+Depends:
+    R (>= 3.1.0)
+Imports:
+    bbmle,
+    TMB,
+    ggplot2,
+    psyphy,
+    emdbook
+License: MIT
+LazyData: true
+RoxygenNote: 5.0.1

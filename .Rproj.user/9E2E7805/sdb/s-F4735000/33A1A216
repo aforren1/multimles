@@ -1,0 +1,17 @@
+{
+    "contents" : "# Hello, world!\n#\n# This is an example function named 'hello'\n# which prints 'Hello, world!'.\n#\n# You can learn more about package authoring with RStudio at:\n#\n#   http://r-pkgs.had.co.nz/\n#\n# Some useful keyboard shortcuts for package authoring:\n#\n#   Build and Reload Package:  'Ctrl + Shift + B'\n#   Check Package:             'Ctrl + Shift + E'\n#   Test Package:              'Ctrl + Shift + T'\n\n#' Testing roxygen2 documentation. This is a title.\n#'\n#'Add a space to separate title from description body.\n#' Rebuild documentation with devtools::document(). See http://r-pkgs.had.co.nz/man.html\n#'@return A string.\n\nhello <- function() {\n  print(\"Hello, world!\")\n}\n\n",
+    "created" : 1450730899804.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "2183620399",
+    "id" : "33A1A216",
+    "lastKnownWriteTime" : 1450745204,
+    "path" : "~/Documents/BLAM/multimles/R/hello.R",
+    "project_path" : "R/hello.R",
+    "properties" : {
+    },
+    "relative_order" : 1,
+    "source_on_save" : false,
+    "type" : "r_source"
+}
