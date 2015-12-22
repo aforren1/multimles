@@ -13,6 +13,11 @@ vignette: >
 ```{r global_options, include=FALSE}
 knitr::opts_chunk$set(fig.width=7, fig.height=6, 
                       warning=FALSE, message=FALSE)
+library(svglite)
+knitr::opts_chunk$set(
+  dev = "svglite",
+  fig.ext = ".svg"
+)
 ```
 
 First, we'll load some of the necessary packages:
