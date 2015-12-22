@@ -24,6 +24,7 @@ knitr::opts_chunk$set(
 First, we'll load some of the necessary packages:
 
 ```{r pkgs, message=FALSE,warning=FALSE}
+# Some of these can be pruned, they're placeholders for ideas
 library(lme4)
 library(bbmle)
 library(optimx)
@@ -204,6 +205,8 @@ print(boots)
 ## Template Model Builder Example
 
 ```{r}
+# https://github.com/kaskr/adcomp/wiki/Documentation
+# See https://github.com/kaskr/adcomp/wiki/Tutorial
 # Also see https://groups.nceas.ucsb.edu/non-linear-modeling/projects
 # writeLines(con = file("temp.cpp"), c('
 # #include <TMB.hpp>
