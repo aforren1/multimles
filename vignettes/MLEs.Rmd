@@ -19,7 +19,7 @@ library(psyphy)
 library(lattice)
 library(ggplot2)
 library(dplyr)
-
+library(nlme)
 ```
 For example, to read in the csv containing the data for the free RT...
 
@@ -54,10 +54,15 @@ forced_rt <- forced_rt %>% filter(!is.nan(reachDir), RT < 0.5, RT > 0)
 
 Alternatives are left as an exercise to the reader.
 
-## MLE
+## Plots
+
+
+## Maximum Likelihood Estimation
 There were eight targets in this experiment. The objective function in `MATLAB` is specified as:
 
-> LL = @(params) -sum(hit.*log((1/8+asymptErr*normcdf(RT,params(1),params(2))*7/8)) + (1-hit).*log(1-(1/8+asymptErr*normcdf(RT,params(1),params(2))*7/8)));
+> `LL = @(params) `
+> `-sum(hit.*log((1/8+asymptErr*normcdf(RT,params(1),params(2))*7/8)) +`
+> `(1-hit).*log(1-(1/8+asymptErr*normcdf(RT,params(1),params(2))*7/8)));`
 
 Where `asymptErr` was the upper asymptote to the probit curve (starting value of 0.9), `params(1)` was the mean (start 0.3), and `params(2)` was the sd (start 0.1).
 
@@ -93,3 +98,13 @@ mlme <- glmer(hit ~ RT + (1|id),
     #lmeprof2 <- profile(mlme2)
     #xyplot(lmeprof2)
 ```
+
+In nlme, here's a fully parameterized model (random asymptote, mean, and sd):
+```{r}
+mnlme <- nlme(hit ~ 1/8 + asym * pnorm(RT, mu, sigma), data = forced_rt,
+           fixed = asym + mu + sigma ~ 1, random = asym + mu + sigma ~ 1, 
+           start = c(asym = .9, mu = .25, sigma = .04), groups = ~id)
+summary(mnlme)
+```
+
+It works fine, conditional on starting values being relatively close to the solution.
