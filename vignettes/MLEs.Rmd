@@ -9,6 +9,7 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
+(note to self: run `rmarkdown::render('vignettes/MLEs.Rmd')` to make html available)
 ```{r global_options, include=FALSE}
 knitr::opts_chunk$set(fig.width=7, fig.height=6, 
                       warning=FALSE, message=FALSE)
@@ -122,18 +123,6 @@ One option is to go the hierarchical/multilevel/mixed model route, which can sav
 
 <note about shrinkage>
 
-Interpretation isn't as direct, but this sort of thing can be fit with `lme4`.
-
-```{r,warning=FALSE,message=FALSE}
-mlme <- glmer(hit ~ RT + (1|id), 
-              data = forced_rt, 
-              family = binomial(link = mafc.probit(8)))
-    mlme2 <- update(mlme, .~. + (0 + RT|id)) # enforcing correlation doesn't work
-    anova(mlme, mlme2)
-    #lmeprof2 <- profile(mlme2)
-    #xyplot(lmeprof2)
-```
-
 In nlme, here's a (mostly) parameterized model (random asymptote, mean, and sd, but no correlation in the random effects. The *fully* parameterized model was tending toward overparameterization, as we got an error suggesting the approx. Hessian of the deviance was not positive definite):
 ```{r}
 mnlme <- nlme(hit ~ 1/8 + asym * pnorm(RT, mu, sigma), data = forced_rt,
@@ -142,15 +131,14 @@ mnlme <- nlme(hit ~ 1/8 + asym * pnorm(RT, mu, sigma), data = forced_rt,
 summary(mnlme)
 ```
 
-Plus intervals on parameters:
+Plus intervals on parameters, and `coef()`:
 ```{r}
-
 intervals(mnlme)
-
+coef(mnlme) # What we would sort of get if we fit each individual
 ```
 
 We'll see how those line up with the rolling average (interactively!):
-```{r}
+```{r, echo = FALSE}
 forced_rt$pred <- predict(mnlme)
 forced_rt$pred0 <- predict(mnlme, level = 0)
 temp <- ggplot(forced_rt, aes(rollrt, rollhit)) + 
@@ -171,7 +159,7 @@ It works fine, conditional on starting values being relatively close to the solu
 
 We'll try a random intercept model first, and use parametric bootstrap for inference.
 
-```{r}
+```{r, echo = FALSE}
 mlme <- lmer(formula = RT ~ 1 + (1 | id), data = free_rt) # Use REML: does this count as "small"?
 boots <- bootMer(mlme, FUN = function(x) 
   predict(x, newdata = data.frame(id = unique(free_rt$id))), 
