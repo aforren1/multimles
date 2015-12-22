@@ -18,6 +18,7 @@ knitr::opts_chunk$set(
   dev = "svglite",
   fig.ext = ".svg"
 )
+#fix text though, svglite flubs it up
 ```
 
 First, we'll load some of the necessary packages:
@@ -35,6 +36,8 @@ library(nlme)
 library(zoo)
 library(boot)
 library(tidyr)
+theme_set(theme_gray(base_size = 8))
+
 ```
 For example, to read in the csv containing the data for the free RT...
 
