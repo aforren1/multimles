@@ -20,6 +20,7 @@ library(lattice)
 library(ggplot2)
 library(dplyr)
 library(nlme)
+library(zoo)
 ```
 For example, to read in the csv containing the data for the free RT...
 
@@ -56,6 +57,24 @@ Alternatives are left as an exercise to the reader.
 
 ## Plots
 
+First, a little bit more pushing around...
+```{r}
+free_rt <- free_rt %>% arrange(RT) %>% 
+  group_by(id) %>% mutate(rollrt = rollmean(RT, 10, na.pad = TRUE),
+                          rollhit = rollmean(hit, 10, na.pad = TRUE))
+forced_rt <- forced_rt %>% arrange(RT) %>% 
+  group_by(id) %>% mutate(rollrt = rollmean(RT, 15, na.pad = TRUE),
+                          rollhit = rollmean(hit, 15, na.pad = TRUE))
+
+```
+
+And plots:
+
+```{r, warning=FALSE}
+ggplot(free_rt, aes(rollrt, rollhit)) + geom_line() + facet_wrap(~id) 
+ggplot(forced_rt, aes(rollrt, rollhit)) + geom_line() + facet_wrap(~id) 
+
+```
 
 ## Maximum Likelihood Estimation
 There were eight targets in this experiment. The objective function in `MATLAB` is specified as:
@@ -105,6 +124,12 @@ mnlme <- nlme(hit ~ 1/8 + asym * pnorm(RT, mu, sigma), data = forced_rt,
            fixed = asym + mu + sigma ~ 1, random = asym + mu + sigma ~ 1, 
            start = c(asym = .9, mu = .25, sigma = .04), groups = ~id)
 summary(mnlme)
+forced_rt$pred <- predict(mnlme)
+ggplot(forced_rt, aes(rollrt, rollhit)) + 
+  geom_line(aes(colour = 'Rolling mean'), size = 1.2) + 
+  geom_line(aes(y = pred, colour = 'nlme pred'), size = 1.2) +
+  facet_wrap(~id) +
+  theme_light()
 ```
 
 It works fine, conditional on starting values being relatively close to the solution.
