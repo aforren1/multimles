@@ -141,7 +141,14 @@ mnlme <- nlme(hit ~ 1/8 + 7/8 * asym * pnorm(RT, mu, sigma),
            random = pdDiag(asym + mu + sigma ~ 1), 
            start = c(asym = .9, mu = .25, sigma = .04), 
            groups = ~id,
-           weights = varExp(form = ~RT)) #consider adding a function to describe within-group variance,
+           weights = varExp(form = ~RT)) 
+mnlme2 <- nlme(hit ~ 1/8 + 7/8 * asym * pnorm(RT, mu, sigma), 
+              data = forced_rt,
+           fixed = asym + mu + sigma ~ 1, 
+           random = pdDiag(asym + mu + sigma ~ 1), 
+           start = c(asym = .9, mu = .25, sigma = .04), 
+           groups = ~id) 
+#consider adding a function to describe within-group variance,
                          #like weights = varExp(form = ~RT). The model fits better and sort of
                          #makes sense, though I haven't wrapped my head around what it *means*.
                          #It does make sense to have unequal variance (large at low RT, small at high)
@@ -159,8 +166,8 @@ We'll see how those line up with the rolling average (interactively!):
 forced_rt$pred <- predict(mnlme)
 forced_rt$pred0 <- predict(mnlme, level = 0)
 temp <- ggplot(forced_rt, aes(rollrt, rollhit)) + 
-  geom_line(aes(colour = 'Rolling mean'), size = 0.2) + 
-  geom_line(aes(y = pred, colour = 'nlme pred'), size = 0.2) +
+  geom_line(aes(colour = 'Rolling mean')) + 
+  geom_line(aes(y = pred, colour = 'nlme pred')) +
   facet_wrap(~id)
 ggplotly(temp)
 
@@ -218,22 +225,69 @@ print(boots)
 #     DATA_VECTOR(hit);       // Obs ervations
 #     DATA_VECTOR(rt);        // Reaction time
 #     DATA_FACTOR(id);        // individuals
-#     PARAMETER(mu);          // mean
-#     PARAMETER(sig);         // sigma
-#     PARAMETER(asym);        // asymptote
-#     PARAMETER(log_sigma);   // ?
-#     PARAMETER(log_sigma_u); // ?
-#     PARAMETER_VECTOR(u);    // random effects contributions
+#     DATA_INTEGER(nsub)      // num of inidividuals
+#     PARAMETER_VECTOR(betas); // mu, sigma, asym
+#     PARAMETER_VECTOR(log_sig_re); // random effects
+#     PARAMETER_VECTOR(log_sig_re_u);
+#     PARAMETER_MATRIX(sig_re_u);
+#
+#     Type sig_re = exp(log_sig_re);
+#     Type sig_u = exp(log_sig_re_u);
+#
+#     ADREPORT(sig_re);
+#     ADREPORT(sig_u);
+#
+#      using namespace density;
+#      int i,j,ii; // i for id, j for observation, ii for ?
+#
+#      Type g=0;
+#      ii = 0;
+#      for (i = 0; i < nsub; i++) {
+#          Type u1 = u[i+...];
+#          Type u2 = u[i+...];
+#          Type u3 = u[i+...];
+#          g -= -(log_sig_u[0]);
+#          g -= -.5*pow(u1/sig_u[0], 2);
+#          g -= -(log_sig_u[1]);
+#          g -= -.5*pow(u2/sig_u[1], 2);
+#          g -= -(log_sig_u[2]);
+#          g -= -.5*pow(u3/sig_u[2], 2);
+#          vector<Type> a(3); 
+#          a[0] = 0.25 + beta[0] + u1;
+#          a[1] = 0.05 + beta[1] + u2;
+#          a[2] = 0.09 + beta[2] + u3;
+#          
+#          Type tmp;
+#          Type f;
+#          // hasn't been un-oranged yet
+#          for(j=0;j<ngroup(i);j++)
+#          {
+#              f = (1/ntarg)+(1-1/ntarg)*a[2]*pnorm(rt[ii],a[0],a[1]);
+#              tmp = (hit[ii] - f)/sigma;
+#              g -= -log_sigma - 0.5*tmp*tmp;
+#              ii++;
+#          }
+#
+#      }
+#
+# return g;
 # }
 # 
 # ')); closeAllConnections()
 # 
-# dat <- list(rt = forced_rt$RT, hit = forced_rt$hit)
+# dat <- list(rt = forced_rt$RT, hit = forced_rt$hit, 
+#             ntarg = 8, ids = unique(forced_rt$id),
+#             nsub = length(unique(forced_rt$id)),
+#             ngroup = c(table(forced_rt$id))) # remove NaNs!
+#
 # obj <- MakeADFun(data = dat,
 #                  parameters = list(
-#                    mu = 0.3,
-#                    sig = 0.1,
-#                    asym = 0.9
+#                    betas = c(0, 0, 0),
+#                    log_sig_re = rep(0.5, 3),
+#                    log_sig_re_u = rep(1, 3),
+#                    sig_re_u = matrix(0, nrow = dat$ids, ncol = 3)
 #                  ),
-#                  random = c('mu','sig','asym'))
+#                  random = c('sig_re_u'))
+
+
 ```
