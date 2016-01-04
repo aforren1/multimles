@@ -117,14 +117,14 @@ llsig <- function(mu, sigma, asymptErr, rt, hit, Ntargs){
     -sum(hit %*% p1 + (1 - hit) %*% p2)
 }
     
-start_vals <- list(mu = 0.3, sigma = 0.1, asymptErr = 0.9)
+start_vals <- list(mu = 0.3, sigma = 0.1)
 subdat <- dplyr::filter(forced_rt, id == 5)
 mod1 <- mle2(llsig,
             start = start_vals, 
             method = "BFGS", 
             optimizer = "optim",
             data = list(rt = subdat$RT, hit = subdat$hit),
-            fixed = list(Ntargs = 8))
+            fixed = list(Ntargs = 8, asymptErr = 0.9))
 ```
     
 It takes some work to get answers out of `mle2`, and the optimizers in R tend not to be as robust as those in MATLAB (at least I've heard/experienced).
@@ -136,13 +136,6 @@ One option is to go the hierarchical/multilevel/mixed model route, which can sav
 In nlme, here's a (mostly) parameterized model (random asymptote, mean, and sd, but no correlation in the random effects. The *fully* parameterized model was tending toward overparameterization, as we got an error suggesting the approx. Hessian of the deviance was not positive definite):
 ```{r}
 mnlme <- nlme(hit ~ 1/8 + 7/8 * asym * pnorm(RT, mu, sigma), 
-              data = forced_rt,
-           fixed = asym + mu + sigma ~ 1, 
-           random = pdDiag(asym + mu + sigma ~ 1), 
-           start = c(asym = .9, mu = .25, sigma = .04), 
-           groups = ~id,
-           weights = varExp(form = ~RT)) 
-mnlme2 <- nlme(hit ~ 1/8 + 7/8 * asym * pnorm(RT, mu, sigma), 
               data = forced_rt,
            fixed = asym + mu + sigma ~ 1, 
            random = pdDiag(asym + mu + sigma ~ 1), 
