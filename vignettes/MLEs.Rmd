@@ -259,11 +259,11 @@ print(boots)
 #          
 #          Type tmp;
 #          Type f;
-#          // hasn't been un-oranged yet
+#          // hasn't been un-oranged yet, and I'm a bit lost
 #          for(j=0;j<ngroup(i);j++)
 #          {
 #              f = (1/ntarg)+(1-1/ntarg)*a[2]*pnorm(rt[ii],a[0],a[1]);
-#              tmp = (hit[ii] - f)/sigma;
+#              tmp = (hit[ii] - f)/sig_re;
 #              g -= -log_sigma - 0.5*tmp*tmp;
 #              ii++;
 #          }
