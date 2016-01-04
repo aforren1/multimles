@@ -89,12 +89,11 @@ forced_rt <- forced_rt %>% arrange(RT) %>%
 And plots:
 
 ```{r, warning=FALSE}
-ggplot(free_rt, aes(RT)) + 
-  geom_histogram(aes(fill = as.factor(hit)), bins = 15) + 
-  facet_wrap(~id)
-ggplot(forced_rt, aes(rollrt, rollhit)) + 
-  geom_line() + 
-  facet_wrap(~id) 
+ggplot(forced_rt, aes(rollrt, rollhit,colour='Forced RT')) + 
+    geom_line(size = 1) + 
+    geom_line(data = free_rt, aes(rollrt, rollhit, colour = 'Free RT'),
+              size = 1) +
+    facet_wrap(~id)
 
 ```
 
@@ -159,10 +158,13 @@ We'll see how those line up with the rolling average (interactively!):
 forced_rt$pred <- predict(mnlme)
 forced_rt$pred0 <- predict(mnlme, level = 0)
 temp <- ggplot(forced_rt, aes(rollrt, rollhit)) + 
-  geom_line(aes(colour = 'Rolling mean')) + 
-  geom_line(aes(y = pred, colour = 'nlme pred')) +
-  facet_wrap(~id)
-ggplotly(temp)
+    geom_line(aes(colour = 'Rolling mean'), size = 1) + 
+    geom_line(aes(y = pred, colour = 'Predicted from nlme'), size = 1) +
+    geom_point(aes(y = ifelse(hit == 0, hit - 0.05, hit + 0.05), colour = 'Raw data'),
+               shape = 108, size = 2) +
+    facet_wrap(~id)
+temp
+#ggplotly(temp) # really wonky for now, just show static plot
 
 ggplot(forced_rt, aes(RT, pred0)) + 
     geom_line(aes(y = pred, colour = 'indiv_pred', group = id), 
