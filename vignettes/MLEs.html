@@ -174,28 +174,7 @@ mod1 &lt;-<span class="st"> </span><span class="kw">mle2</span>(llsig,
 ## 
 ## Number of Observations: 2679
 ## Number of Groups: 10</code></pre>
-<p>Plus intervals on parameters, and <code>coef()</code>:</p>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">intervals</span>(mnlme)</code></pre>
-<pre><code>## Approximate 95% confidence intervals
-## 
-##  Fixed effects:
-##        lower    est.   upper
-## asym  0.8822 0.92689 0.97153
-## mu    0.2255 0.23490 0.24426
-## sigma 0.0211 0.02534 0.02959
-## attr(,&quot;label&quot;)
-## [1] &quot;Fixed effects:&quot;
-## 
-##  Random Effects:
-##   Level: id 
-##               lower    est.   upper
-## sd(asym)  0.0322917 0.05936 0.10911
-## sd(mu)    0.0088070 0.01437 0.02346
-## sd(sigma) 0.0005229 0.00318 0.01934
-## 
-##  Within-group standard error:
-##  lower   est.  upper 
-## 0.3235 0.3323 0.3414</code></pre>
+<p>Plus <code>coef()</code>:</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">coef</span>(mnlme) <span class="co"># What we would sort of get if we fit each individual</span></code></pre>
 <pre><code>##      asym     mu   sigma
 ## 1  0.9916 0.2051 0.02429

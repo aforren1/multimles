@@ -147,9 +147,8 @@ mnlme <- nlme(hit ~ 1/8 + 7/8 * asym * pnorm(RT, mu, sigma),
 summary(mnlme)
 ```
 
-Plus intervals on parameters, and `coef()`:
+Plus `coef()`:
 ```{r}
-intervals(mnlme)
 coef(mnlme) # What we would sort of get if we fit each individual
 ```
 
