@@ -3,4 +3,4 @@
 
 The package can be installed using:
 
-devtools::install_github('aforren1/multimles')
+    devtools::install_github('aforren1/multimles')
